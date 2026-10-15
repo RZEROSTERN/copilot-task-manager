@@ -61,5 +61,11 @@ localStorage implementation. Pinia state is persisted under the `board-store`
 key. On first launch, the store seeds a Product Launch board with To Do, In
 Progress, In Review, and Done lists and nine varied sample cards.
 
-This is an incremental prototype. The app shell, board interactions, offline
-support, and desktop packaging are being added feature by feature.
+The app shell in `src/App.vue` provides a collapsible workspace sidebar, board
+navigation, header, and responsive home screen. `useTheme()` follows the
+system color preference until the user selects a theme; that choice is saved
+locally. `usePlatform()` isolates web/desktop detection, external links, and
+optional window controls from UI components.
+
+This is an incremental prototype. Board interactions, offline support, and
+desktop packaging are being added feature by feature.
