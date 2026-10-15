@@ -368,6 +368,36 @@ button:focus-visible {
   font-size: 10px;
 }
 
+.offline-indicator {
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, #c65353 25%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, #c65353 9%, var(--surface));
+  color: #b34444;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.install-app-button {
+  display: flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+}
+
+.install-app-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .user-avatar {
   display: grid;
   width: 31px;
@@ -511,6 +541,11 @@ button:focus-visible {
   .header-chevron,
   .saved-indicator {
     display: none;
+  }
+
+  .install-app-button {
+    min-height: 30px;
+    padding: 0 7px;
   }
 
   .mobile-sidebar-toggle {

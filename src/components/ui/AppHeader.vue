@@ -4,11 +4,14 @@ import AppIcon from './AppIcon.vue'
 defineProps<{
   title: string
   isDark: boolean
+  isOffline: boolean
+  canInstall: boolean
 }>()
 
 const emit = defineEmits<{
   toggleSidebar: []
   toggleTheme: []
+  installApp: []
 }>()
 </script>
 
@@ -32,7 +35,27 @@ const emit = defineEmits<{
       <h1>{{ title }}</h1>
     </div>
     <div class="header-actions">
+      <span
+        v-if="isOffline"
+        class="offline-indicator"
+        role="status"
+        aria-live="polite"
+      >
+        Offline
+      </span>
       <span class="saved-indicator"><span /> Saved</span>
+      <button
+        v-if="canInstall"
+        class="install-app-button"
+        type="button"
+        @click="emit('installApp')"
+      >
+        <AppIcon
+          name="download"
+          :size="15"
+        />
+        Install
+      </button>
       <button
         class="icon-button theme-toggle"
         type="button"

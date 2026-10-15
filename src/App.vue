@@ -5,11 +5,13 @@ import AppHeader from './components/ui/AppHeader.vue'
 import AppSidebar from './components/ui/AppSidebar.vue'
 import BoardDialog from './components/ui/BoardDialog.vue'
 import { useTheme } from './composables/useTheme'
+import { usePwa } from './composables/usePwa'
 import { useBoardStore } from './stores/board'
 import type { Board } from './types'
 
 const boardStore = useBoardStore()
 const { isDark, toggleTheme } = useTheme()
+const { isOffline, canInstall, installApp } = usePwa()
 const sidebarCollapsed = ref(false)
 const boardDialogOpen = ref(false)
 const renameTarget = ref<Board | null>(null)
@@ -80,8 +82,11 @@ function selectBoard(boardId: string): void {
       <AppHeader
         :title="activeBoard?.title ?? 'Your workspace'"
         :is-dark="isDark"
+        :is-offline="isOffline"
+        :can-install="canInstall"
         @toggle-sidebar="toggleSidebar"
         @toggle-theme="toggleTheme"
+        @install-app="installApp"
       />
       <main class="main-content">
         <RouterView
