@@ -1,6 +1,18 @@
 <script setup lang="ts">
 defineProps<{
-  name: 'grid' | 'chevron' | 'plus' | 'sun' | 'moon' | 'panel' | 'external' | 'more' | 'close'
+  name:
+    | 'grid'
+    | 'chevron'
+    | 'plus'
+    | 'sun'
+    | 'moon'
+    | 'panel'
+    | 'external'
+    | 'more'
+    | 'close'
+    | 'check'
+    | 'calendar'
+    | 'drag'
   size?: number
 }>()
 </script>
@@ -75,6 +87,25 @@ defineProps<{
     <path
       v-else-if="name === 'close'"
       d="m6 6 12 12M18 6 6 18"
+    />
+    <path
+      v-else-if="name === 'check'"
+      d="m5 12 4 4L19 6"
+    />
+    <template v-else-if="name === 'calendar'">
+      <rect
+        x="3"
+        y="5"
+        width="18"
+        height="16"
+        rx="2"
+      />
+      <path d="M16 3v4M8 3v4M3 10h18" />
+    </template>
+    <path
+      v-else-if="name === 'drag'"
+      d="M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01"
+      stroke-width="3"
     />
     <template v-else-if="name === 'sun'">
       <circle
