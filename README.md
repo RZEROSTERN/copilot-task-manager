@@ -49,8 +49,9 @@ integration branch.
 
 Run `npm run build` and publish the generated `dist/` directory to a static
 host such as Vercel, Netlify, Cloudflare Pages, or S3 + CloudFront. PWA
-configuration and desktop installer instructions will be added with their
-respective features.
+support is included in the production build. Serve the site over HTTPS (or
+localhost during development) to enable service workers and installation.
+Desktop installer instructions will be added with their respective feature.
 
 ## Project status
 
@@ -99,5 +100,15 @@ Keyboard shortcuts: press `/` to focus board search, or focus a list and press
 `N` to open its quick-add card composer. Shortcuts are ignored while typing in
 form fields or while a dialog is open.
 
-This is an incremental prototype. Board interactions, offline support, and
-desktop packaging are being added feature by feature.
+## Install and offline use
+
+In a supported browser, choose **Install** in the app header when it appears,
+or use the browser's install option. On iOS, use Safari's Share menu and select
+**Add to Home Screen**. The app caches its production app shell and static
+assets so previously loaded boards can be opened offline; an Offline status is
+shown when the browser has no network connection. Board data stays in this
+browser's local storage and is not synchronized between devices. The service
+worker does not cache board data or API responses.
+
+This is an incremental prototype. Additional board interactions and desktop
+packaging are being added feature by feature.

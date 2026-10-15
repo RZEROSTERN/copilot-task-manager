@@ -16,6 +16,7 @@ defineProps<{
     | 'search'
     | 'filter'
     | 'clear'
+    | 'download'
   size?: number
 }>()
 </script>
@@ -125,6 +126,10 @@ defineProps<{
     <path
       v-else-if="name === 'clear'"
       d="m6 6 12 12M18 6 6 18"
+    />
+    <path
+      v-else-if="name === 'download'"
+      d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"
     />
     <template v-else-if="name === 'sun'">
       <circle
