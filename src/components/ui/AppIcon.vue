@@ -17,6 +17,9 @@ defineProps<{
     | 'filter'
     | 'clear'
     | 'download'
+    | 'window-minimize'
+    | 'window-maximize'
+    | 'window-restore'
   size?: number
 }>()
 </script>
@@ -130,6 +133,22 @@ defineProps<{
     <path
       v-else-if="name === 'download'"
       d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"
+    />
+    <path
+      v-else-if="name === 'window-minimize'"
+      d="M5 12h14"
+    />
+    <rect
+      v-else-if="name === 'window-maximize'"
+      x="5"
+      y="5"
+      width="14"
+      height="14"
+      rx="1"
+    />
+    <path
+      v-else-if="name === 'window-restore'"
+      d="M8 8V5h11v11h-3M5 8h11v11H5z"
     />
     <template v-else-if="name === 'sun'">
       <circle

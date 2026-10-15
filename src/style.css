@@ -332,6 +332,41 @@ button:focus-visible {
   background: var(--surface);
 }
 
+.desktop-title-drag {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.desktop-app-header {
+  padding-right: 0;
+}
+
+.window-controls {
+  display: flex;
+  height: 100%;
+  align-items: stretch;
+  margin-left: 6px;
+}
+
+.window-control-button {
+  display: grid;
+  width: 42px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.window-control-button:hover {
+  background: var(--surface-hover);
+}
+
+.window-close-button:hover {
+  background: #d92d35;
+  color: white;
+}
+
 .header-title-group,
 .header-actions {
   display: flex;
