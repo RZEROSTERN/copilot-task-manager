@@ -3,10 +3,11 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from '../components/ui/AppIcon.vue'
+import CardDetailModal from '../features/cards/CardDetailModal.vue'
 import ListColumn from '../features/lists/ListColumn.vue'
 import ListComposer from '../features/lists/ListComposer.vue'
 import { useBoardStore } from '../stores/board'
-import type { Board, TaskList } from '../types'
+import type { Board, Card, TaskList } from '../types'
 
 defineProps<{
   boards: Board[]
@@ -28,6 +29,7 @@ const sortableLists = ref<TaskList[]>([])
 const addingList = ref(false)
 const listComposer = ref<InstanceType<typeof ListComposer> | null>(null)
 const draggingCardId = ref<string | null>(null)
+const selectedCardId = ref<string | null>(null)
 
 watch(
   lists,
@@ -75,6 +77,15 @@ function handleCardDragStart(cardId: string): void {
 
 function handleCardDragEnd(): void {
   draggingCardId.value = null
+}
+
+function openCard(card: Card): void {
+  selectedCardId.value = card.id
+}
+
+function deleteCard(card: Card): void {
+  store.deleteCard(card.id)
+  selectedCardId.value = null
 }
 </script>
 
@@ -145,6 +156,7 @@ function handleCardDragEnd(): void {
           @move-card="moveCard"
           @card-drag-start="handleCardDragStart"
           @card-drag-end="handleCardDragEnd"
+          @open-card="openCard"
         />
       </VueDraggable>
       <div
@@ -181,6 +193,11 @@ function handleCardDragEnd(): void {
         {{ lists.length ? 'Add another list' : 'Add your first list' }}
       </button>
     </div>
+    <CardDetailModal
+      :card-id="selectedCardId"
+      @close="selectedCardId = null"
+      @delete="deleteCard"
+    />
   </section>
   <section
     v-else

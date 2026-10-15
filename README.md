@@ -83,5 +83,11 @@ cancel). Drag cards by their grip within or between lists. Card tiles show
 their colored labels, due dates, checklist progress, and assignee initials;
 overdue dates are highlighted in red.
 
+Select a card to open its details. Edit its title, Markdown description,
+labels, due date, checklist, and assignee; use the Move to control to choose a
+destination list and position without dragging. The dialog supports Escape,
+focus trapping, and keyboard navigation. Deleting a card asks for
+confirmation.
+
 This is an incremental prototype. Board interactions, offline support, and
 desktop packaging are being added feature by feature.

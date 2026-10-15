@@ -20,6 +20,7 @@ const emit = defineEmits<{
   moveCard: [payload: { cardId: string; targetListId: string; position: number }]
   cardDragStart: [cardId: string]
   cardDragEnd: []
+  openCard: [card: Card]
 }>()
 
 const editing = ref(false)
@@ -155,6 +156,12 @@ function createCard(title: string): void {
         v-for="card in sortableCards"
         :key="card.id"
         class="task-card-draggable"
+        role="button"
+        tabindex="0"
+        :aria-label="`Open card: ${card.title}`"
+        @click="emit('openCard', card)"
+        @keydown.enter.prevent="emit('openCard', card)"
+        @keydown.space.prevent="emit('openCard', card)"
       >
         <span
           class="card-drag-handle"
