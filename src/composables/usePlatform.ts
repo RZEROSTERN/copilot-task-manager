@@ -1,4 +1,6 @@
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { isTauri } from '@tauri-apps/api/core'
+import type { Window as TauriWindow } from '@tauri-apps/api/window'
 
 export type Platform = 'web' | 'desktop'
 
@@ -8,62 +10,77 @@ export interface WindowControls {
   close(): Promise<void>
 }
 
-export interface PlatformAdapter {
-  platform: Platform
-  windowControls: WindowControls | null
-  openExternal(url: string): Promise<void>
-}
+export function usePlatform() {
+  const isDesktop = ref(false)
+  const isMaximized = ref(false)
+  const currentWindow = shallowRef<TauriWindow | null>(null)
+  const hasWindowControls = computed(() => isDesktop.value && currentWindow.value !== null)
+  let unlistenResize: (() => void) | undefined
 
-interface DesktopBridge {
-  minimize(): Promise<void>
-  toggleMaximize(): Promise<void>
-  close(): Promise<void>
-  openExternal(url: string): Promise<void>
-}
-
-declare global {
-  interface Window {
-    __TAURI_INTERNALS__?: DesktopBridge
-  }
-}
-
-const adapter: PlatformAdapter = {
-  get platform() {
-    return typeof window !== 'undefined' && window.__TAURI_INTERNALS__ !== undefined
-      ? 'desktop'
-      : 'web'
-  },
-  get windowControls() {
-    const bridge = typeof window !== 'undefined' ? window.__TAURI_INTERNALS__ : undefined
-    if (!bridge) return null
-    return {
-      minimize: () => bridge.minimize(),
-      toggleMaximize: () => bridge.toggleMaximize(),
-      close: () => bridge.close(),
+  async function refreshMaximizedState(): Promise<void> {
+    const window = currentWindow.value
+    if (!window) return
+    try {
+      isMaximized.value = await window.isMaximized()
+    } catch (error) {
+      console.error('Unable to read desktop window state.', error)
     }
-  },
-  async openExternal(url: string): Promise<void> {
+  }
+
+  onMounted(async () => {
+    isDesktop.value = isTauri()
+    if (!isDesktop.value) return
+
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window')
+      currentWindow.value = getCurrentWindow()
+      await refreshMaximizedState()
+      unlistenResize = await currentWindow.value.onResized(refreshMaximizedState)
+    } catch (error) {
+      console.error('Unable to initialize desktop window controls.', error)
+    }
+  })
+
+  onBeforeUnmount(() => unlistenResize?.())
+
+  async function runWindowAction(action: (window: TauriWindow) => Promise<unknown>): Promise<void> {
+    const window = currentWindow.value
+    if (!window) return
+    try {
+      await action(window)
+      await refreshMaximizedState()
+    } catch (error) {
+      console.error('Unable to perform desktop window action.', error)
+    }
+  }
+
+  async function openExternal(url: string): Promise<void> {
     const destination = new URL(url)
     if (destination.protocol !== 'https:' && destination.protocol !== 'http:') {
       throw new Error('Only HTTP and HTTPS external links are supported.')
     }
-    const bridge = typeof window !== 'undefined' ? window.__TAURI_INTERNALS__ : undefined
-    if (bridge) {
-      await bridge.openExternal(destination.toString())
+
+    if (isDesktop.value) {
+      const { openUrl } = await import('@tauri-apps/plugin-opener')
+      await openUrl(destination.toString())
       return
     }
     window.open(destination.toString(), '_blank', 'noopener,noreferrer')
-  },
-}
+  }
 
-export function usePlatform() {
-  const platform = computed(() => adapter.platform)
-  const isDesktop = computed(() => platform.value === 'desktop')
+  const platform = computed<Platform>(() => (isDesktop.value ? 'desktop' : 'web'))
+  const windowControls: WindowControls = {
+    minimize: () => runWindowAction((window) => window.minimize()),
+    toggleMaximize: () => runWindowAction((window) => window.toggleMaximize()),
+    close: () => runWindowAction((window) => window.close()),
+  }
 
   return {
     platform,
     isDesktop,
-    windowControls: adapter.windowControls,
-    openExternal: adapter.openExternal,
+    isMaximized,
+    hasWindowControls,
+    windowControls,
+    openExternal,
   }
 }

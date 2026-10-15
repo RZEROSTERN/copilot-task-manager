@@ -28,12 +28,11 @@ Vite prints the local development URL in the terminal.
 ```text
 src/
   components/ui/  Shared interface components
-  composables/    Reusable Composition API logic
+  composables/    Shared platform and Composition API logic
   features/
     boards/       Board feature
     cards/        Card feature
     lists/        List feature
-  platform/       Runtime-specific adapters
   router/         Hash-based Vue Router setup
   stores/         Pinia state stores
   types/          Shared TypeScript types
@@ -110,5 +109,29 @@ shown when the browser has no network connection. Board data stays in this
 browser's local storage and is not synchronized between devices. The service
 worker does not cache board data or API responses.
 
-This is an incremental prototype. Additional board interactions and desktop
-packaging are being added feature by feature.
+## Desktop app (Tauri)
+
+The desktop app uses Tauri 2. Install Node.js 20.19 or newer and the stable
+Rust toolchain through [rustup](https://rustup.rs/). Tauri also requires
+platform-specific native dependencies; follow the current
+[Tauri prerequisites](https://tauri.app/start/prerequisites/) for your OS:
+
+- **Windows:** Microsoft C++ Build Tools with the Windows SDK, plus WebView2.
+- **macOS:** Xcode Command Line Tools.
+- **Linux:** GTK 3, WebKit2GTK, and the system libraries listed for your
+  distribution in the Tauri prerequisites.
+
+Run the desktop app in development or build platform-specific installers with:
+
+```sh
+npm run tauri:dev
+npm run tauri:build
+```
+
+Installers are written under `src-tauri/target/release/bundle/`. The desktop
+window provides native minimize, maximize/restore, and close controls and
+restores its last size and position. PWA installation and service-worker
+registration remain browser-only.
+
+This is an incremental prototype. Additional board interactions are being
+added feature by feature.

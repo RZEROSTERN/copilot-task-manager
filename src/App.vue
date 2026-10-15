@@ -6,12 +6,14 @@ import AppSidebar from './components/ui/AppSidebar.vue'
 import BoardDialog from './components/ui/BoardDialog.vue'
 import { useTheme } from './composables/useTheme'
 import { usePwa } from './composables/usePwa'
+import { usePlatform } from './composables/usePlatform'
 import { useBoardStore } from './stores/board'
 import type { Board } from './types'
 
 const boardStore = useBoardStore()
 const { isDark, toggleTheme } = useTheme()
 const { isOffline, canInstall, installApp } = usePwa()
+const { isDesktop, isMaximized, hasWindowControls, windowControls } = usePlatform()
 const sidebarCollapsed = ref(false)
 const boardDialogOpen = ref(false)
 const renameTarget = ref<Board | null>(null)
@@ -84,9 +86,15 @@ function selectBoard(boardId: string): void {
         :is-dark="isDark"
         :is-offline="isOffline"
         :can-install="canInstall"
+        :is-desktop="isDesktop"
+        :is-maximized="isMaximized"
+        :has-window-controls="hasWindowControls"
         @toggle-sidebar="toggleSidebar"
         @toggle-theme="toggleTheme"
         @install-app="installApp"
+        @minimize-window="windowControls.minimize"
+        @toggle-maximize-window="windowControls.toggleMaximize"
+        @close-window="windowControls.close"
       />
       <main class="main-content">
         <RouterView
