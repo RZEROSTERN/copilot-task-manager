@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  name: 'grid' | 'chevron' | 'plus' | 'sun' | 'moon' | 'panel' | 'external'
+  name: 'grid' | 'chevron' | 'plus' | 'sun' | 'moon' | 'panel' | 'external' | 'more' | 'close'
   size?: number
 }>()
 </script>
@@ -54,6 +54,27 @@ defineProps<{
     <path
       v-else-if="name === 'plus'"
       d="M12 5v14M5 12h14"
+    />
+    <template v-else-if="name === 'more'">
+      <circle
+        cx="5"
+        cy="12"
+        r="1"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="1"
+      />
+      <circle
+        cx="19"
+        cy="12"
+        r="1"
+      />
+    </template>
+    <path
+      v-else-if="name === 'close'"
+      d="m6 6 12 12M18 6 6 18"
     />
     <template v-else-if="name === 'sun'">
       <circle
