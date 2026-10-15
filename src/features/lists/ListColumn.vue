@@ -1,20 +1,40 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
-import type { TaskList } from '../../types'
+import { VueDraggable } from 'vue-draggable-plus'
+import type { Card, Label, TaskList } from '../../types'
 import AppIcon from '../../components/ui/AppIcon.vue'
+import CardComposer from '../cards/CardComposer.vue'
+import CardTile from '../cards/CardTile.vue'
 
 const props = defineProps<{
   list: TaskList
+  cards: Card[]
+  labels: Label[]
+  draggingCardId: string | null
 }>()
 
 const emit = defineEmits<{
   rename: [payload: { listId: string; title: string }]
   delete: [list: TaskList]
+  createCard: [payload: { listId: string; title: string }]
+  moveCard: [payload: { cardId: string; targetListId: string; position: number }]
+  cardDragStart: [cardId: string]
+  cardDragEnd: []
 }>()
 
 const editing = ref(false)
 const title = ref(props.list.title)
 const titleInput = ref<HTMLInputElement | null>(null)
+const addingCard = ref(false)
+const sortableCards = ref<Card[]>([...props.cards])
+
+watch(
+  () => props.cards,
+  (cards) => {
+    sortableCards.value = [...cards]
+  },
+  { deep: true },
+)
 
 watch(
   () => props.list.title,
@@ -44,6 +64,29 @@ function saveTitle(): void {
 function cancelEdit(): void {
   title.value = props.list.title
   editing.value = false
+}
+
+function finishCardDrag(): void {
+  const cardId = props.draggingCardId
+  if (!cardId) return
+  const position = sortableCards.value.findIndex((card) => card.id === cardId)
+  if (position < 0) return
+  emit('moveCard', { cardId, targetListId: props.list.id, position })
+}
+
+function handleCardDragStart(event: { oldIndex?: number }): void {
+  const card = event.oldIndex === undefined ? undefined : sortableCards.value[event.oldIndex]
+  if (card) emit('cardDragStart', card.id)
+}
+
+function handleCardDragEnd(): void {
+  finishCardDrag()
+  emit('cardDragEnd')
+}
+
+function createCard(title: string): void {
+  emit('createCard', { listId: props.list.id, title })
+  addingCard.value = false
 }
 </script>
 
@@ -93,18 +136,64 @@ function cancelEdit(): void {
       </button>
     </header>
 
-    <div class="list-empty-content">
-      <div class="list-empty-mark">
-        <span /><span /><span />
+    <VueDraggable
+      v-model="sortableCards"
+      class="list-card-stack"
+      :group="{ name: 'board-cards', pull: true, put: true }"
+      :animation="160"
+      handle=".card-drag-handle"
+      draggable=".task-card-draggable"
+      ghost-class="card-ghost"
+      chosen-class="card-chosen"
+      drag-class="card-dragging"
+      :empty-insert-threshold="24"
+      @start="handleCardDragStart"
+      @end="handleCardDragEnd"
+      @add="finishCardDrag"
+    >
+      <div
+        v-for="card in sortableCards"
+        :key="card.id"
+        class="task-card-draggable"
+      >
+        <span
+          class="card-drag-handle"
+          aria-label="Drag to move card"
+          title="Drag to move"
+        >
+          <AppIcon
+            name="drag"
+            :size="15"
+          />
+        </span>
+        <CardTile
+          :card="card"
+          :labels="labels"
+        />
       </div>
-      <p>{{ list.cardIds.length ? 'Cards are ready to organize' : 'No cards yet' }}</p>
-      <span>Cards will appear here</span>
-    </div>
+      <div
+        v-if="sortableCards.length === 0 && !addingCard"
+        class="list-empty-content"
+      >
+        <div class="list-empty-mark">
+          <span /><span /><span />
+        </div>
+        <p>No cards yet</p>
+        <span>Add a card to get started</span>
+      </div>
+    </VueDraggable>
 
+    <CardComposer
+      v-if="addingCard"
+      :active="addingCard"
+      @create="createCard"
+      @cancel="addingCard = false"
+    />
     <button
+      v-else
       class="list-add-card"
       type="button"
-      disabled
+      @click="addingCard = true"
     >
       <AppIcon
         name="plus"

@@ -27,6 +27,7 @@ const lists = computed(() => board.value ? store.listsForBoard(board.value.id) :
 const sortableLists = ref<TaskList[]>([])
 const addingList = ref(false)
 const listComposer = ref<InstanceType<typeof ListComposer> | null>(null)
+const draggingCardId = ref<string | null>(null)
 
 watch(
   lists,
@@ -58,6 +59,22 @@ function deleteList(list: TaskList): void {
     `Delete "${list.title}" and its ${list.cardIds.length} ${list.cardIds.length === 1 ? 'card' : 'cards'}? This cannot be undone.`,
   )
   if (confirmed) store.deleteList(list.id)
+}
+
+function createCard(payload: { listId: string; title: string }): void {
+  store.createCard(payload.listId, payload.title)
+}
+
+function moveCard(payload: { cardId: string; targetListId: string; position: number }): void {
+  store.moveCard(payload.cardId, payload.targetListId, payload.position)
+}
+
+function handleCardDragStart(cardId: string): void {
+  draggingCardId.value = cardId
+}
+
+function handleCardDragEnd(): void {
+  draggingCardId.value = null
 }
 </script>
 
@@ -119,8 +136,15 @@ function deleteList(list: TaskList): void {
           v-for="list in sortableLists"
           :key="list.id"
           :list="list"
+          :cards="store.cardsForList(list.id)"
+          :labels="store.labels"
+          :dragging-card-id="draggingCardId"
           @rename="({ listId, title }) => store.renameList(listId, title)"
           @delete="deleteList"
+          @create-card="createCard"
+          @move-card="moveCard"
+          @card-drag-start="handleCardDragStart"
+          @card-drag-end="handleCardDragEnd"
         />
       </VueDraggable>
       <div

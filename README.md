@@ -78,5 +78,10 @@ deleting a list and its cards. Drag a list by its grip to reorder it; the new
 order is persisted with the board data. On touch-sized screens, the columns
 scroll horizontally with snap points.
 
+Cards can be added inline at the bottom of each list (Enter to save, Escape to
+cancel). Drag cards by their grip within or between lists. Card tiles show
+their colored labels, due dates, checklist progress, and assignee initials;
+overdue dates are highlighted in red.
+
 This is an incremental prototype. Board interactions, offline support, and
 desktop packaging are being added feature by feature.
