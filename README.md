@@ -67,5 +67,10 @@ system color preference until the user selects a theme; that choice is saved
 locally. `usePlatform()` isolates web/desktop detection, external links, and
 optional window controls from UI components.
 
+The boards home view lists saved boards and supports creating, renaming,
+coloring, opening, and deleting them. Board deletion asks for confirmation
+before removing that board and its lists and cards. Open a board from the
+sidebar or its home-page tile to view its lists and card counts.
+
 This is an incremental prototype. Board interactions, offline support, and
 desktop packaging are being added feature by feature.

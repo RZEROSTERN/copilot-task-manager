@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import type { Board } from '../../types'
 import AppIcon from './AppIcon.vue'
 
@@ -76,12 +77,12 @@ const activeBoard = computed(() =>
           />
         </button>
       </div>
-      <button
+      <RouterLink
         v-for="board in boards"
         :key="board.id"
         class="board-nav-item"
         :class="{ 'is-active': board.id === activeBoardId }"
-        type="button"
+        :to="{ name: 'board', params: { boardId: board.id } }"
         :title="collapsed ? board.title : undefined"
         @click="emit('selectBoard', board.id)"
       >
@@ -97,7 +98,7 @@ const activeBoard = computed(() =>
           v-if="!collapsed && board.id === activeBoard?.id"
           class="active-indicator"
         />
-      </button>
+      </RouterLink>
       <button
         v-if="!collapsed"
         class="new-board-button"

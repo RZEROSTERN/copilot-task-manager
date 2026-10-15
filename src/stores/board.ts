@@ -78,6 +78,9 @@ export const useBoardStore = defineStore('board-store', {
       this.boards = this.boards.filter((board) => board.id !== boardId)
       this.lists = this.lists.filter((list) => list.boardId !== boardId)
       this.cards = this.cards.filter((card) => !cardIds.has(card.id))
+      if (this.activeBoardId === boardId) {
+        this.activeBoardId = this.boards[0]?.id ?? null
+      }
       this.persist()
     },
     createList(boardId: string, title: string): TaskList {
