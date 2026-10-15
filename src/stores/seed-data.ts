@@ -147,6 +147,7 @@ export function createSeedData(): BoardState {
         createdAt: dateOffset(-10),
       },
     ],
+    activeBoardId: 'board-sample',
     lists: lists.map((list) => ({ ...list, cardIds: [...list.cardIds] })),
     cards: cards.map((card) => ({
       ...card,

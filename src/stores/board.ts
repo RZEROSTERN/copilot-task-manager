@@ -23,6 +23,8 @@ export const useBoardStore = defineStore('board-store', {
       state.lists.find((list) => list.id === listId),
     cardById: (state) => (cardId: string) =>
       state.cards.find((card) => card.id === cardId),
+    activeBoard: (state) =>
+      state.boards.find((board) => board.id === state.activeBoardId) ?? state.boards[0],
     listsForBoard: (state) => (boardId: string) =>
       state.lists
         .filter((list) => list.boardId === boardId)
@@ -36,6 +38,11 @@ export const useBoardStore = defineStore('board-store', {
     },
   },
   actions: {
+    setActiveBoard(boardId: string): void {
+      if (!this.boards.some((board) => board.id === boardId)) return
+      this.activeBoardId = boardId
+      this.persist()
+    },
     persist(): void {
       boardRepository.save(this.$state)
     },

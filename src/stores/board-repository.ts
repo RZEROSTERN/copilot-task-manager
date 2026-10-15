@@ -30,6 +30,7 @@ function isBoardState(value: unknown): value is BoardState {
 
   const candidate = value
   return (
+    (candidate.activeBoardId === null || typeof candidate.activeBoardId === 'string') &&
     Array.isArray(candidate.boards) &&
     candidate.boards.every(
       (board) =>

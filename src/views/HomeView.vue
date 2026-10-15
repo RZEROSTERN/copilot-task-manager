@@ -1,15 +1,28 @@
 <template>
-  <main class="flex min-h-screen items-center justify-center px-6">
-    <section class="max-w-lg text-center">
-      <p class="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">
-        Copilot Task Manager
+  <div class="home-view">
+    <section class="welcome-panel">
+      <div class="welcome-icon">
+        <span /><span /><span /><span />
+      </div>
+      <p class="eyebrow">
+        Your workspace
       </p>
-      <h1 class="mt-4 text-4xl font-bold tracking-tight text-gray-900">
-        Your work, organized.
-      </h1>
-      <p class="mt-4 text-lg text-gray-600">
-        A calmer way to keep every task moving.
+      <h2>Your work, in a better flow.</h2>
+      <p class="welcome-copy">
+        Your boards are ready. Choose one from the sidebar to get started, or create a new board
+        for your next project.
       </p>
+      <div class="welcome-stats">
+        <div><strong>{{ boardCount }}</strong><span>{{ boardCount === 1 ? 'board' : 'boards' }}</span></div>
+        <div><strong>Private</strong><span>just for you</span></div>
+        <div><strong>Saved</strong><span>on this device</span></div>
+      </div>
     </section>
-  </main>
+  </div>
 </template>
+
+<script setup lang="ts">
+defineProps<{
+  boardCount: number
+}>()
+</script>

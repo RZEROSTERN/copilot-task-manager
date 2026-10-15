@@ -8,4 +8,5 @@ export interface BoardState {
   lists: TaskList[]
   cards: Card[]
   labels: Label[]
+  activeBoardId: string | null
 }
