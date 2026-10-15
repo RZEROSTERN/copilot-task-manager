@@ -89,5 +89,15 @@ destination list and position without dragging. The dialog supports Escape,
 focus trapping, and keyboard navigation. Deleting a card asks for
 confirmation.
 
+Search the current board by card title, description, assignee, or label name.
+Use the Labels filter to select one or more labels; cards must match every
+selected label as well as the search text. Clear filters to show all cards
+again. Card dragging is paused while a search or label filter is active so
+hidden cards cannot change position accidentally.
+
+Keyboard shortcuts: press `/` to focus board search, or focus a list and press
+`N` to open its quick-add card composer. Shortcuts are ignored while typing in
+form fields or while a dialog is open.
+
 This is an incremental prototype. Board interactions, offline support, and
 desktop packaging are being added feature by feature.
