@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import type { Card, Label, TaskList } from '../../types'
 import AppIcon from '../../components/ui/AppIcon.vue'
@@ -11,6 +11,9 @@ const props = defineProps<{
   cards: Card[]
   labels: Label[]
   draggingCardId: string | null
+  searchQuery: string
+  activeLabelIds: string[]
+  visibleCardIds: string[]
 }>()
 
 const emit = defineEmits<{
@@ -21,13 +24,20 @@ const emit = defineEmits<{
   cardDragStart: [cardId: string]
   cardDragEnd: []
   openCard: [card: Card]
+  focusList: [listId: string]
+  blurList: [listId: string]
 }>()
 
 const editing = ref(false)
 const title = ref(props.list.title)
 const titleInput = ref<HTMLInputElement | null>(null)
 const addingCard = ref(false)
+const cardComposer = ref<InstanceType<typeof CardComposer> | null>(null)
 const sortableCards = ref<Card[]>([...props.cards])
+const isFiltering = computed(
+  () => props.searchQuery.trim().length > 0 || props.activeLabelIds.length > 0,
+)
+const visibleCardCount = computed(() => props.visibleCardIds.length)
 
 watch(
   () => props.cards,
@@ -89,10 +99,33 @@ function createCard(title: string): void {
   emit('createCard', { listId: props.list.id, title })
   addingCard.value = false
 }
+
+async function focusAddCard(): Promise<void> {
+  addingCard.value = true
+  await nextTick()
+  void cardComposer.value?.focusInput()
+}
+
+function handleFocusOut(event: FocusEvent): void {
+  if (!(event.currentTarget instanceof HTMLElement)) return
+  const nextTarget = event.relatedTarget
+  if (!(nextTarget instanceof Node) || !event.currentTarget.contains(nextTarget)) {
+    emit('blurList', props.list.id)
+  }
+}
+
+defineExpose({
+  listId: props.list.id,
+  focusAddCard,
+})
 </script>
 
 <template>
-  <article class="kanban-list">
+  <article
+    class="kanban-list"
+    @focusin="emit('focusList', list.id)"
+    @focusout="handleFocusOut"
+  >
     <header class="kanban-list-header">
       <span
         class="list-drag-handle"
@@ -148,12 +181,14 @@ function createCard(title: string): void {
       chosen-class="card-chosen"
       drag-class="card-dragging"
       :empty-insert-threshold="24"
+      :disabled="isFiltering"
       @start="handleCardDragStart"
       @end="handleCardDragEnd"
       @add="finishCardDrag"
     >
       <div
         v-for="card in sortableCards"
+        v-show="visibleCardIds.includes(card.id)"
         :key="card.id"
         class="task-card-draggable"
         role="button"
@@ -179,19 +214,20 @@ function createCard(title: string): void {
         />
       </div>
       <div
-        v-if="sortableCards.length === 0 && !addingCard"
+        v-if="visibleCardCount === 0 && !addingCard"
         class="list-empty-content"
       >
         <div class="list-empty-mark">
           <span /><span /><span />
         </div>
-        <p>No cards yet</p>
-        <span>Add a card to get started</span>
+        <p>{{ isFiltering ? 'No cards match these filters' : 'No cards yet' }}</p>
+        <span>{{ isFiltering ? 'Try changing your search or labels' : 'Add a card to get started' }}</span>
       </div>
     </VueDraggable>
 
     <CardComposer
       v-if="addingCard"
+      ref="cardComposer"
       :active="addingCard"
       @create="createCard"
       @cancel="addingCard = false"
