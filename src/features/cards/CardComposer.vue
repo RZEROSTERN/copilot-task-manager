@@ -30,6 +30,13 @@ function create(): void {
   title.value = ''
 }
 
+async function focusInput(): Promise<void> {
+  await nextTick()
+  input.value?.focus()
+}
+
+defineExpose({ focusInput })
+
 function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault()

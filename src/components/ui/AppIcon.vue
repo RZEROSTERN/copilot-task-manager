@@ -13,6 +13,9 @@ defineProps<{
     | 'check'
     | 'calendar'
     | 'drag'
+    | 'search'
+    | 'filter'
+    | 'clear'
   size?: number
 }>()
 </script>
@@ -106,6 +109,22 @@ defineProps<{
       v-else-if="name === 'drag'"
       d="M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01"
       stroke-width="3"
+    />
+    <template v-else-if="name === 'search'">
+      <circle
+        cx="10.8"
+        cy="10.8"
+        r="6.8"
+      />
+      <path d="m16 16 4.5 4.5" />
+    </template>
+    <path
+      v-else-if="name === 'filter'"
+      d="M4 5h16l-6.2 7.2v5.3l-3.6 1.8v-7.1L4 5Z"
+    />
+    <path
+      v-else-if="name === 'clear'"
+      d="m6 6 12 12M18 6 6 18"
     />
     <template v-else-if="name === 'sun'">
       <circle
