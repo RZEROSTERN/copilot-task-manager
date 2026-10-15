@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, nextTick, ref, watch } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
+import { RouterLink, useRoute } from 'vue-router'
 import AppIcon from '../components/ui/AppIcon.vue'
+import ListColumn from '../features/lists/ListColumn.vue'
+import ListComposer from '../features/lists/ListComposer.vue'
 import { useBoardStore } from '../stores/board'
-import type { Board } from '../types'
+import type { Board, TaskList } from '../types'
 
 defineProps<{
   boards: Board[]
@@ -21,70 +24,138 @@ const route = useRoute()
 const store = useBoardStore()
 const board = computed(() => store.boardById(String(route.params.boardId)))
 const lists = computed(() => board.value ? store.listsForBoard(board.value.id) : [])
+const sortableLists = ref<TaskList[]>([])
+const addingList = ref(false)
+const listComposer = ref<InstanceType<typeof ListComposer> | null>(null)
+
+watch(
+  lists,
+  (nextLists) => {
+    sortableLists.value = nextLists.map((list) => ({ ...list, cardIds: [...list.cardIds] }))
+  },
+  { immediate: true },
+)
+
+function reorderLists(): void {
+  if (!board.value) return
+  store.reorderLists(board.value.id, sortableLists.value.map((list) => list.id))
+}
+
+async function addList(): Promise<void> {
+  addingList.value = true
+  await nextTick()
+  void listComposer.value?.focusInput()
+}
+
+function createList(title: string): void {
+  if (!board.value) return
+  store.createList(board.value.id, title)
+  addingList.value = false
+}
+
+function deleteList(list: TaskList): void {
+  const confirmed = window.confirm(
+    `Delete "${list.title}" and its ${list.cardIds.length} ${list.cardIds.length === 1 ? 'card' : 'cards'}? This cannot be undone.`,
+  )
+  if (confirmed) store.deleteList(list.id)
+}
 </script>
 
 <template>
   <section
     v-if="board"
-    class="board-overview"
+    class="kanban-board-page"
   >
-    <div class="board-overview-heading">
-      <div>
-        <p class="eyebrow">
-          Board
-        </p>
-        <h2>{{ board.title }}</h2>
-        <p class="boards-subtitle">
-          Your project at a glance.
-        </p>
-      </div>
-      <span class="board-overview-badge">
-        <span :style="{ backgroundColor: board.color }" />
-        {{ lists.length }} {{ lists.length === 1 ? 'list' : 'lists' }}
-      </span>
-    </div>
-
-    <div
-      v-if="lists.length"
-      class="board-preview-grid"
-    >
-      <article
-        v-for="list in lists"
-        :key="list.id"
-        class="board-preview-list"
-      >
-        <div class="preview-list-header">
-          <span class="preview-list-dot" />
-          <h3>{{ list.title }}</h3>
-          <span class="preview-list-count">{{ store.cardsForList(list.id).length }}</span>
+    <div class="kanban-heading">
+      <div class="kanban-heading-title">
+        <RouterLink
+          class="back-to-boards"
+          :to="{ name: 'home' }"
+          aria-label="Back to all boards"
+        >
+          <AppIcon
+            name="chevron"
+            :size="16"
+          />
+        </RouterLink>
+        <div>
+          <p class="eyebrow">
+            Board
+          </p>
+          <h2>{{ board.title }}</h2>
         </div>
-        <p
-          v-if="store.cardsForList(list.id).length"
-          class="preview-card-names"
-        >
-          {{ store.cardsForList(list.id).slice(0, 3).map((card) => card.title).join(' · ') }}
-        </p>
-        <p
-          v-else
-          class="preview-empty"
-        >
-          No cards yet
-        </p>
-      </article>
+        <span class="board-list-total">{{ lists.length }} {{ lists.length === 1 ? 'list' : 'lists' }}</span>
+      </div>
+      <button
+        class="primary-button add-list-top"
+        type="button"
+        @click="addList"
+      >
+        <AppIcon
+          name="plus"
+          :size="16"
+        />
+        Add list
+      </button>
     </div>
 
-    <div
-      v-else
-      class="board-empty-lists"
-    >
-      <div class="empty-state-icon">
-        <AppIcon
-          name="grid"
-          :size="24"
+    <div class="kanban-scroll-hint">
+      <span /> Drag lists to reorder <span />
+    </div>
+
+    <div class="kanban-scroll-area">
+      <VueDraggable
+        v-if="lists.length"
+        v-model="sortableLists"
+        class="kanban-lists"
+        :animation="180"
+        handle=".list-drag-handle"
+        ghost-class="list-ghost"
+        chosen-class="list-chosen"
+        drag-class="list-dragging"
+        @end="reorderLists"
+      >
+        <ListColumn
+          v-for="list in sortableLists"
+          :key="list.id"
+          :list="list"
+          @rename="({ listId, title }) => store.renameList(listId, title)"
+          @delete="deleteList"
         />
+      </VueDraggable>
+      <div
+        v-else
+        class="lists-empty-state"
+      >
+        <div class="empty-state-icon">
+          <AppIcon
+            name="grid"
+            :size="22"
+          />
+        </div>
+        <h3>Start with a list</h3>
+        <p>Lists help break your board into clear stages.</p>
       </div>
-      <h3>This board is ready for lists</h3>
-      <p>Lists and cards can be added as you plan your work.</p>
+
+      <ListComposer
+        v-if="addingList"
+        ref="listComposer"
+        class="new-list-composer"
+        @create="createList"
+        @cancel="addingList = false"
+      />
+      <button
+        v-else
+        class="add-list-tile"
+        type="button"
+        @click="addList"
+      >
+        <AppIcon
+          name="plus"
+          :size="17"
+        />
+        {{ lists.length ? 'Add another list' : 'Add your first list' }}
+      </button>
     </div>
   </section>
   <section

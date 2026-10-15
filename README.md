@@ -72,5 +72,11 @@ coloring, opening, and deleting them. Board deletion asks for confirmation
 before removing that board and its lists and cards. Open a board from the
 sidebar or its home-page tile to view its lists and card counts.
 
+The board view now presents lists as a horizontally scrollable Kanban board.
+Create lists inline, rename a list by selecting its title, and confirm before
+deleting a list and its cards. Drag a list by its grip to reorder it; the new
+order is persisted with the board data. On touch-sized screens, the columns
+scroll horizontally with snap points.
+
 This is an incremental prototype. Board interactions, offline support, and
 desktop packaging are being added feature by feature.
