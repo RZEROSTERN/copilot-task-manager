@@ -54,5 +54,12 @@ respective features.
 
 ## Project status
 
-This is an incremental prototype. Board data, task interactions, offline
+The board, list, card, checklist, and label models live in `src/types/`.
+`src/stores/board.ts` owns normalized board data and its mutations;
+`src/stores/board-repository.ts` defines the persistence boundary and its
+localStorage implementation. Pinia state is persisted under the `board-store`
+key. On first launch, the store seeds a Product Launch board with To Do, In
+Progress, In Review, and Done lists and nine varied sample cards.
+
+This is an incremental prototype. The app shell, board interactions, offline
 support, and desktop packaging are being added feature by feature.
